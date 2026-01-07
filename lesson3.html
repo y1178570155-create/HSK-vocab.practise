@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.时间与数量 - HSK练习</title>
+    <style>
+        :root {
+            --primary: #8E44AD; /* 紫色主题，对应时间/神秘感 */
+            --correct: #27AE60;
+            --wrong: #C0392B;
+            --bg: #F4F6F7;
+            --text: #2C3E50;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            width: 100%;
+            max-width: 650px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 90vh;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #8E44AD 0%, #9B59B6 100%);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        h1 { margin: 0; font-size: 1.2rem; font-weight: 700; }
+        .stats { font-size: 0.9rem; margin-top: 5px; opacity: 0.9; }
+
+        /* Scrollable Content */
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Start Screen */
+        .start-screen {
+            text-align: center;
+            margin: auto;
+        }
+        
+        .info-box {
+            background: #F0F3F4;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .btn-start {
+            background: var(--correct);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+            transition: transform 0.2s;
+        }
+        .btn-start:active { transform: scale(0.95); }
+
+        /* Question Area */
+        .q-type-badge {
+            display: inline-block;
+            background: #E8DAEF;
+            color: #8E44AD;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .q-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        /* Ruby Pinyin Styling */
+        ruby { ruby-position: over; }
+        rt { font-size: 0.5em; color: #7F8C8D; font-weight: normal; }
+
+        /* Options */
+        .options-grid { display: grid; gap: 12px; }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #E5E8E8;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-btn:hover:not(:disabled) { border-color: var(--primary); background: #FDFEFE; }
+
+        .option-btn.correct {
+            background-color: #EAFAF1;
+            border-color: var(--correct);
+            color: #186A3B;
+        }
+
+        .option-btn.wrong {
+            background-color: #FDEDEC;
+            border-color: var(--wrong);
+            color: #943126;
+        }
+
+        /* Feedback */
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #FAFAFA;
+            border-left: 5px solid #ccc;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .feedback.is-correct { border-left-color: var(--correct); }
+        .feedback.is-wrong { border-left-color: var(--wrong); }
+
+        .thai-expl { margin-top: 8px; color: #666; font-size: 0.95rem; }
+
+        /* Navigation */
+        .nav-buttons {
+            margin-top: auto;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .nav-btn.prev { background: #ECF0F1; color: #7F8C8D; }
+        .nav-btn.next { background: var(--primary); color: white; }
+        .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>3.时间与数量 (Time & Quantity)</h1>
+        <div class="stats">
+            <span id="progress">题目: 0/50</span> | <span id="score">得分: 0</span>
+        </div>
+    </header>
+
+    <div class="content">
+        <div id="start-screen" class="start-screen">
+            <h2>欢迎参加 HSK 专项练习</h2>
+            <div class="info-box">
+                <p><strong>内容：</strong>时间表达、数字、数量词、频率副词</p>
+                <p><strong>题量：</strong>50 题 (50 ข้อ)</p>
+                <p><strong>规则：</strong>选择唯一正确的答案 (เลือกคำตอบที่ถูกต้องที่สุดเพียงข้อเดียว)</p>
+            </div>
+            <button class="btn-start" onclick="startQuiz()">开始练习 (เริ่ม)</button>
+        </div>
+
+        <div id="quiz-area" style="display: none; height: 100%; flex-direction: column;">
+            <div id="question-box" style="flex-grow: 1;">
+                </div>
+            
+            <div id="feedback-box" class="feedback"></div>
+
+            <div class="nav-buttons">
+                <button id="btn-prev" class="nav-btn prev" onclick="prevQuestion()" disabled>上一题</button>
+                <button id="btn-next" class="nav-btn next" onclick="nextQuestion()" disabled>下一题</button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="start-screen" style="display: none;">
+            <h2>练习结束 (เสร็จสิ้น)</h2>
+            <h1 id="final-score" style="font-size: 4rem; color: var(--primary); margin: 20px 0;"></h1>
+            <p>复习是学习的关键！</p>
+            <button class="btn-start" onclick="location.reload()">再做一次 (ทำอีกครั้ง)</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- 50道题目数据 (拼音 -> 简单 -> 难) ---
+const questionsData = [
+    // --- Part 1: Pinyin Identification (1-10) ---
+    { q: "时间", options: ["shí jiān", "sí jiān", "shí xiān", "shí jiàn"], answer: 0, explain: "shí jiān = เวลา (Time)", isPinyin: true },
+    { q: "早上", options: ["zǎo shang", "zhǎo shang", "zǎo shàng", "zāo shang"], answer: 0, explain: "zǎo shang = ตอนเช้า (Morning) 'shang' เป็นเสียงเบา", isPinyin: true },
+    { q: "昨天", options: ["zuó tiān", "zuò tiān", "zhuó tiān", "zǒu tiān"], answer: 0, explain: "zuó tiān = เมื่อวาน (Yesterday)", isPinyin: true },
+    { q: "晚上", options: ["wǎn shang", "wán shang", "wǎn shàng", "wàng shang"], answer: 0, explain: "wǎn shang = ตอนเย็น/ตอนค่ำ (Evening/Night)", isPinyin: true },
+    { q: "经常", options: ["jīng cháng", "jīn cháng", "jīng cáng", "jìng cháng"], answer: 0, explain: "jīng cháng = บ่อยๆ (Often)", isPinyin: true },
+    { q: "有时候", options: ["yǒu shí hou", "yǒu sí hou", "yǒu shí hòu", "yǒu shí hoù"], answer: 0, explain: "yǒu shí hou = บางครั้ง (Sometimes)", isPinyin: true },
+    { q: "以后", options: ["yǐ hòu", "yí hòu", "yǐ hǒu", "yī hòu"], answer: 0, explain: "yǐ hòu = หลังจากนี้/ในอนาคต (After/In the future)", isPinyin: true },
+    { q: "分钟", options: ["fēn zhōng", "fēn zōng", "fēng zhōng", "fèn zhōng"], answer: 0, explain: "fēn zhōng = นาที (Minute)", isPinyin: true },
+    { q: "现在", options: ["xiàn zài", "xiān zài", "xiàn zhài", "xiàn zāi"], answer: 0, explain: "xiàn zài = ตอนนี้ (Now)", isPinyin: true },
+    { q: "刚才", options: ["gāng cái", "gàng cái", "gāng chái", "gāng cāi"], answer: 0, explain: "gāng cái = เมื่อกี้นี้ (Just now)", isPinyin: true },
+
+    // --- Part 2: Numbers & Basic Quantity (11-20) ---
+    { q: "我们班有____个学生。", options: ["<ruby>两<rt>liǎng</rt></ruby>", "<ruby>二<rt>èr</rt></ruby>", "<ruby>双<rt>shuāng</rt></ruby>", "<ruby>对<rt>duì</rt></ruby>"], answer: 0, explain: "ใช้บอกจำนวนนับต้องใช้ 'liǎng' (สอง) เสมอเมื่อตามด้วยลักษณนาม", isPinyin: false },
+    { q: "今天是____月一号。", options: ["<ruby>五<rt>wǔ</rt></ruby>", "<ruby>个<rt>gè</rt></ruby>", "<ruby>本<rt>běn</rt></ruby>", "<ruby>次<rt>cì</rt></ruby>"], answer: 0, explain: "เดือนห้า (พฤษภาคม) ใช้เลขจำนวนนับปกติ = wǔ yuè", isPinyin: false },
+    { q: "我有____汉语书。", options: ["<ruby>三本<rt>sān běn</rt></ruby>", "<ruby>三个<rt>sān gè</rt></ruby>", "<ruby>三位<rt>sān wèi</rt></ruby>", "<ruby>三张<rt>sān zhāng</rt></ruby>"], answer: 0, explain: "หนังสือ ใช้ลักษณนาม 'běn' (เล่ม)", isPinyin: false },
+    { q: "这个苹果____钱？", options: ["<ruby>多少<rt>duōshao</rt></ruby>", "<ruby>几<rt>jǐ</rt></ruby>", "<ruby>怎么<rt>zěnme</rt></ruby>", "<ruby>什么<rt>shénme</rt></ruby>"], answer: 0, explain: "ถามราคาใช้ 'duōshao' (เท่าไหร่)", isPinyin: false },
+    { q: "你家有____口人？", options: ["<ruby>几<rt>jǐ</rt></ruby>", "<ruby>多少<rt>duōshao</rt></ruby>", "<ruby>怎么<rt>zěnme</rt></ruby>", "<ruby>谁<rt>shéi</rt></ruby>"], answer: 0, explain: "ถามจำนวนสมาชิกในครอบครัว (จำนวนน้อย) นิยมใช้ 'jǐ'", isPinyin: false },
+    { q: "我在北京住了____年。", options: ["<ruby>四<rt>sì</rt></ruby>", "<ruby>第四<rt>dì-sì</rt></ruby>", "<ruby>四月<rt>sì yuè</rt></ruby>", "<ruby>号<rt>hào</rt></ruby>"], answer: 0, explain: "อยู่มา 4 ปี (บอกจำนวนระยะเวลา) ใช้เลขจำนวนนับได้เลย", isPinyin: false },
+    { q: "他是____来的？", options: ["<ruby>什么时候<rt>shénme shíhou</rt></ruby>", "<ruby>几点<rt>jǐ diǎn</rt></ruby>", "<ruby>多少时间<rt>duōshao shíjiān</rt></ruby>", "<ruby>什么<rt>shénme</rt></ruby>"], answer: 0, explain: "โครงสร้าง 是...的 ถามเวลาในอดีตใช้ 'shénme shíhou' (เมื่อไหร่)", isPinyin: false },
+    { q: "我买了____衣服。", options: ["<ruby>一件<rt>yí jiàn</rt></ruby>", "<ruby>一头<rt>yì tóu</rt></ruby>", "<ruby>一只<rt>yì zhī</rt></ruby>", "<ruby>一本<rt>yì běn</rt></ruby>"], answer: 0, explain: "เสื้อผ้า ใช้ลักษณนาม 'jiàn' (ตัว/ชิ้น)", isPinyin: false },
+    { q: "这里有____椅子。", options: ["<ruby>一把<rt>yì bǎ</rt></ruby>", "<ruby>一台<rt>yì tái</rt></ruby>", "<ruby>一张<rt>yì zhāng</rt></ruby>", "<ruby>一门<rt>yì mén</rt></ruby>"], answer: 0, explain: "เก้าอี้ ใช้ลักษณนาม 'bǎ' (ตัว - สำหรับสิ่งของที่มีด้ามจับหรือพนักพิง)", isPinyin: false },
+    { q: "我想喝____水。", options: ["<ruby>一杯<rt>yì bēi</rt></ruby>", "<ruby>一盘<rt>yì pán</rt></ruby>", "<ruby>一包<rt>yì bāo</rt></ruby>", "<ruby>一个<rt>yí gè</rt></ruby>"], answer: 0, explain: "น้ำ ใช้ลักษณนามภาชนะบรรจุ 'bēi' (แก้ว)", isPinyin: false },
+
+    // --- Part 3: Telling Time & Dates (21-30) ---
+    { q: "现在是下午____。", options: ["<ruby>两点<rt>liǎng diǎn</rt></ruby>", "<ruby>二点<rt>èr diǎn</rt></ruby>", "<ruby>两时<rt>liǎng shí</rt></ruby>", "<ruby>二时<rt>èr shí</rt></ruby>"], answer: 0, explain: "บอกเวลา 'บ่ายสองโมง' ต้องใช้ 'liǎng diǎn' ห้ามใช้ èr", isPinyin: false },
+    { q: "现在是三点____。", options: ["<ruby>半<rt>bàn</rt></ruby>", "<ruby>一半<rt>yíbàn</rt></ruby>", "<ruby>分<rt>fēn</rt></ruby>", "<ruby>刻<rt>kè</rt></ruby>"], answer: 0, explain: "3:30 พูดว่า 'sān diǎn bàn' (สามโมงครึ่ง)", isPinyin: false },
+    { q: "今天是星期____？", options: ["<ruby>几<rt>jǐ</rt></ruby>", "<ruby>多少<rt>duōshao</rt></ruby>", "<ruby>怎么<rt>zěnme</rt></ruby>", "<ruby>什么<rt>shénme</rt></ruby>"], answer: 0, explain: "ถามวันในสัปดาห์ใช้ 'xīngqī jǐ' (วันอะไร)", isPinyin: false },
+    { q: "昨天是8月31号，明天是____。", options: ["<ruby>9月2号<rt>jiǔyuè èrhào</rt></ruby>", "<ruby>9月1号<rt>jiǔyuè yīhào</rt></ruby>", "<ruby>8月32号<rt>bāyuè sānshí'èr</rt></ruby>", "<ruby>8月1号<rt>bāyuè yīhào</rt></ruby>"], answer: 0, explain: "ถ้าเมื่อวาน 31 ส.ค. -> วันนี้ 1 ก.ย. -> พรุ่งนี้ 2 ก.ย.", isPinyin: false },
+    { q: "电影____开始？", options: ["<ruby>几点<rt>jǐ diǎn</rt></ruby>", "<ruby>多少<rt>duōshao</rt></ruby>", "<ruby>几时<rt>jǐ shí</rt></ruby>", "<ruby>小时<rt>xiǎoshí</rt></ruby>"], answer: 0, explain: "ถามจุดเวลาที่แน่นอนใช้ 'jǐ diǎn' (กี่โมง)", isPinyin: false },
+    { q: "我们要去中国____。", options: ["<ruby>一个星期<rt>yí gè xīngqī</rt></ruby>", "<ruby>一星期<rt>yì xīngqī</rt></ruby>", "<ruby>星期一<rt>xīngqī yī</rt></ruby>", "<ruby>星期<rt>xīngqī</rt></ruby>"], answer: 0, explain: "บอกระยะเวลา 'หนึ่งสัปดาห์' ใช้ 'yí gè xīngqī'", isPinyin: false },
+    { q: "我每天早上八点____起床。", options: ["<ruby>差一刻<rt>chà yí kè</rt></ruby>", "<ruby>差<rt>chà</rt></ruby>", "<ruby>刻<rt>kè</rt></ruby>", "<ruby>分<rt>fēn</rt></ruby>"], answer: 0, explain: "8 โมง 'อีก 15 นาที' (7:45) ใช้โครงสร้าง 'chà yí kè'", isPinyin: false },
+    { q: "一年有____个月。", options: ["<ruby>十二<rt>shí'èr</rt></ruby>", "<ruby>两<rt>liǎng</rt></ruby>", "<ruby>二十<rt>èrshí</rt></ruby>", "<ruby>第十二<rt>dì-shí'èr</rt></ruby>"], answer: 0, explain: "1 ปีมี 12 เดือน (จำนวนนับ) = shí'èr", isPinyin: false },
+    { q: "你是____年出生的？", options: ["<ruby>哪<rt>nǎ</rt></ruby>", "<ruby>那<rt>nà</rt></ruby>", "<ruby>这<rt>zhè</rt></ruby>", "<ruby>几<rt>jǐ</rt></ruby>"], answer: 0, explain: "ถามปีเกิดใช้ 'nǎ nián' (ปีไหน)", isPinyin: false },
+    { q: "今天是____，我不上班。", options: ["<ruby>星期日<rt>xīngqīrì</rt></ruby>", "<ruby>星期天儿<rt>xīngqītiānr</rt></ruby>", "<ruby>号<rt>hào</rt></ruby>", "<ruby>日<rt>rì</rt></ruby>"], answer: 0, explain: "วันอาทิตย์ เรียกว่า 'xīngqīrì' หรือ 'xīngqītiān'", isPinyin: false },
+
+    // --- Part 4: Frequency & Duration (31-40) ---
+    { q: "他____去图书馆看书。", options: ["<ruby>经常<rt>jīngcháng</rt></ruby>", "<ruby>非常<rt>fēicháng</rt></ruby>", "<ruby>往常<rt>wǎngcháng</rt></ruby>", "<ruby>长长<rt>chángcháng</rt></ruby>"], answer: 0, explain: "บอกความถี่ 'บ่อยๆ' ใช้ 'jīngcháng' (often)", isPinyin: false },
+    { q: "我____没吃过这个菜。", options: ["<ruby>从来<rt>cónglái</rt></ruby>", "<ruby>总是<rt>zǒngshì</rt></ruby>", "<ruby>经常<rt>jīngcháng</rt></ruby>", "<ruby>有时候<rt>yǒushíhou</rt></ruby>"], answer: 0, explain: "ไม่เคย...เลย (Never) ใช้ 'cónglái + méi'", isPinyin: false },
+    { q: "你每天学习____时间？", options: ["<ruby>多长<rt>duōcháng</rt></ruby>", "<ruby>几点<rt>jǐ diǎn</rt></ruby>", "<ruby>怎么<rt>zěnme</rt></ruby>", "<ruby>长<rt>cháng</rt></ruby>"], answer: 0, explain: "ถามระยะเวลาความยาวนานใช้ 'duōcháng shíjiān' (นานแค่ไหน)", isPinyin: false },
+    { q: "我每天学习三个____。", options: ["<ruby>小时<rt>xiǎoshí</rt></ruby>", "<ruby>点<rt>diǎn</rt></ruby>", "<ruby>钟<rt>zhōng</rt></ruby>", "<ruby>时候<rt>shíhou</rt></ruby>"], answer: 0, explain: "ระยะเวลา 3 ชั่วโมง ใช้ 'xiǎoshí' (ห้ามใช้ diǎn)", isPinyin: false },
+    { q: "这种药，一天吃三____。", options: ["<ruby>次<rt>cì</rt></ruby>", "<ruby>下<rt>xià</rt></ruby>", "<ruby>遍<rt>biàn</rt></ruby>", "<ruby>回<rt>huí</rt></ruby>"], answer: 0, explain: "กินยา 3 'ครั้ง' ใช้ลักษณนาม 'cì'", isPinyin: false },
+    { q: "这本小说我看过两____。", options: ["<ruby>遍<rt>biàn</rt></ruby>", "<ruby>次<rt>cì</rt></ruby>", "<ruby>趟<rt>tàng</rt></ruby>", "<ruby>个<rt>gè</rt></ruby>"], answer: 0, explain: "อ่านจบตั้งแต่ต้นจนจบ 2 'รอบ' ใช้ 'biàn'", isPinyin: false },
+    { q: "我____都在家。", options: ["<ruby>一直<rt>yìzhí</rt></ruby>", "<ruby>一向<rt>yíxiàng</rt></ruby>", "<ruby>一起<rt>yìqǐ</rt></ruby>", "<ruby>一面<rt>yímiàn</rt></ruby>"], answer: 0, explain: "อยู่บ้าน 'ตลอดเวลา' (Continuously) ใช้ 'yìzhí'", isPinyin: false },
+    { q: "他____迟到。", options: ["<ruby>总是<rt>zǒngshì</rt></ruby>", "<ruby>都是<rt>dōushì</rt></ruby>", "<ruby>凡是<rt>fánshì</rt></ruby>", "<ruby>很是<rt>hěnshì</rt></ruby>"], answer: 0, explain: "มาสาย 'เสมอ/ตลอด' (Always) ใช้ 'zǒngshì'", isPinyin: false },
+    { q: "请等我____。", options: ["<ruby>一会儿<rt>yíhuìr</rt></ruby>", "<ruby>一点儿<rt>yìdiǎnr</rt></ruby>", "<ruby>一次<rt>yícì</rt></ruby>", "<ruby>一下儿<rt>yíxiàr</rt></ruby>"], answer: 0, explain: "รอฉัน 'สักครู่' ใช้ 'yíhuìr'", isPinyin: false },
+    { q: "我们____去跑步吧。", options: ["<ruby>偶尔<rt>ǒu'ěr</rt></ruby>", "<ruby>经常<rt>jīngcháng</rt></ruby>", "<ruby>从来<rt>cónglái</rt></ruby>", "<ruby>每次<rt>měicì</rt></ruby>"], answer: 0, explain: "ชวนไปวิ่ง 'บางครั้งบางคราว' (Occasionally) ในบริบทนี้ 'ǒu'ěr' เหมาะสมที่สุดสำหรับการชวนเปลี่ยนบรรยากาศ", isPinyin: false },
+
+    // --- Part 5: Logic & Context (41-50) ---
+    { q: "我2020年去过中国，____我还想去。", options: ["<ruby>明年<rt>míngnián</rt></ruby>", "<ruby>去年<rt>qùnián</rt></ruby>", "<ruby>昨天<rt>zuótiān</rt></ruby>", "<ruby>前年<rt>qiánnián</rt></ruby>"], answer: 0, explain: "วางแผนในอนาคต (อยากไปอีก) ต้องใช้คำระบุอนาคต คือ 'míngnián' (ปีหน้า)", isPinyin: false },
+    { q: "睡觉____，我喜欢喝牛奶。", options: ["<ruby>以前<rt>yǐqián</rt></ruby>", "<ruby>以后<rt>yǐhòu</rt></ruby>", "<ruby>刚才<rt>gāngcái</rt></ruby>", "<ruby>然后<rt>ránhòu</rt></ruby>"], answer: 0, explain: "'ก่อน' นอน (Before sleeping) ใช้ 'yǐqián'", isPinyin: false },
+    { q: "他来了____，我们就走。", options: ["<ruby>以后<rt>yǐhòu</rt></ruby>", "<ruby>以前<rt>yǐqián</rt></ruby>", "<ruby>后来<rt>hòulái</rt></ruby>", "<ruby>然后<rt>ránhòu</rt></ruby>"], answer: 0, explain: "'หลังจาก' เขามาแล้ว (After) ใช้ 'yǐhòu'", isPinyin: false },
+    { q: "A: 还有多长时间上课？<br>B: ____。", options: ["<ruby>十分钟<rt>shí fēnzhōng</rt></ruby>", "<ruby>十点<rt>shí diǎn</rt></ruby>", "<ruby>十块<rt>shí kuài</rt></ruby>", "<ruby>十次<rt>shí cì</rt></ruby>"], answer: 0, explain: "ถาม 'อีกนานแค่ไหน' ต้องตอบระยะเวลา = 10 นาที", isPinyin: false },
+    { q: "这部电影____长？", options: ["<ruby>有多<rt>yǒu duō</rt></ruby>", "<ruby>怎么<rt>zěnme</rt></ruby>", "<ruby>什么<rt>shénme</rt></ruby>", "<ruby>几<rt>jǐ</rt></ruby>"], answer: 0, explain: "ถามระดับความยาว (How long) ใช้โครงสร้าง 'yǒu duō + adj'", isPinyin: false },
+    { q: "他____不在家。", options: ["<ruby>刚才<rt>gāngcái</rt></ruby>", "<ruby>刚<rt>gāng</rt></ruby>", "<ruby>才<rt>cái</rt></ruby>", "<ruby>刚刚<rt>gānggāng</rt></ruby>"], answer: 0, explain: "เมื่อกี้นี้เขาไม่อยู่ (Time word วางหน้าประโยคได้) = gāngcái", isPinyin: false },
+    { q: "这个商场____开门？", options: ["<ruby>几点<rt>jǐ diǎn</rt></ruby>", "<ruby>几<rt>jǐ</rt></ruby>", "<ruby>多少<rt>duōshao</rt></ruby>", "<ruby>多久<rt>duōjiǔ</rt></ruby>"], answer: 0, explain: "ถามเวลาเปิดทำการ (จุดเวลา) ใช้ 'jǐ diǎn'", isPinyin: false },
+    { q: "我____也没去过那个地方。", options: ["<ruby>一次<rt>yí cì</rt></ruby>", "<ruby>一下<rt>yí xià</rt></ruby>", "<ruby>一会儿<rt>yí huìr</rt></ruby>", "<ruby>一遍<rt>yí biàn</rt></ruby>"], answer: 0, explain: "แม้แต่ครั้งเดียวก็ไม่เคยไป (เน้นปฏิเสธ) = yí cì yě méi...", isPinyin: false },
+    { q: "他____八点才起床。", options: ["<ruby>每天<rt>měitiān</rt></ruby>", "<ruby>刚才<rt>gāngcái</rt></ruby>", "<ruby>现在<rt>xiànzài</rt></ruby>", "<ruby>正在<rt>zhèngzài</rt></ruby>"], answer: 0, explain: "บอกกิจวัตร (ตื่นสาย 8 โมงกว่าจะตื่น) ใช้ 'měitiān' (ทุกวัน)", isPinyin: false },
+    { q: "请问，现在____了？", options: ["<ruby>几点<rt>jǐ diǎn</rt></ruby>", "<ruby>多少时间<rt>duōshao shíjiān</rt></ruby>", "<ruby>什么时候<rt>shénme shíhou</rt></ruby>", "<ruby>怎么<rt>zěnme</rt></ruby>"], answer: 0, explain: "ถามเวลาปัจจุบันแบบสุภาพ = Xiànzài jǐ diǎn le?", isPinyin: false }
+];
+
+// --- Application Logic ---
+let currentState = {
+    qIndex: 0,
+    score: 0,
+    answers: new Array(questionsData.length).fill(null), // null = unanswered
+    shuffledQs: []
+};
+
+// Utility: Shuffle Array
+function shuffle(array) {
+    let currentIndex = array.length, randomIndex;
+    while (currentIndex != 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+}
+
+// Start Quiz
+function startQuiz() {
+    // 1. Prepare questions: Clone and shuffle ONLY options inside
+    currentState.shuffledQs = questionsData.map((q, idx) => {
+        // Create an array of indices [0, 1, 2, 3]
+        let optIndices = [0, 1, 2, 3];
+        shuffle(optIndices); // Shuffle the indices
+        
+        return {
+            ...q,
+            originalIndex: idx,
+            shuffledOptionIndices: optIndices 
+        };
+    });
+
+    currentState.qIndex = 0;
+    currentState.score = 0;
+    currentState.answers.fill(null);
+
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'none';
+    document.getElementById('quiz-area').style.display = 'flex';
+    document.getElementById('score').innerText = `得分: 0`;
+
+    loadQuestion(0);
+}
+
+// Load Question
+function loadQuestion(index) {
+    currentState.qIndex = index;
+    const qData = currentState.shuffledQs[index];
+    const qContainer = document.getElementById('question-box');
+    
+    // Update Progress
+    document.getElementById('progress').innerText = `题目: ${index + 1}/${questionsData.length}`;
+    
+    // Determine Question Type Badge
+    let typeBadge = qData.isPinyin ? "拼音测试 (Pinyin)" : "词汇与语法 (Vocab & Grammar)";
+
+    // HTML Structure
+    let html = `
+        <span class="q-type-badge">${typeBadge}</span>
+        <div class="q-text">${index + 1}. ${qData.q}</div>
+        <div class="options-grid">
+    `;
+
+    // Render Options based on shuffled indices
+    qData.shuffledOptionIndices.forEach(optIndex => {
+        const optionText = qData.options[optIndex];
+        const isSelected = currentState.answers[index] === optIndex;
+        let btnClass = "option-btn";
+        let disabled = "";
+
+        // If question already answered, apply styling
+        if (currentState.answers[index] !== null) {
+            disabled = "disabled";
+            if (optIndex === qData.answer) {
+                btnClass += " correct"; // Always show correct answer in green
+            } else if (isSelected) {
+                btnClass += " wrong"; // Show user's wrong choice in red
+            }
+        }
+
+        // Click Handler (only if not answered)
+        const onClick = disabled ? "" : `onclick="handleAnswer(${optIndex})"`;
+        
+        html += `<button class="${btnClass}" ${onClick} ${disabled}>${optionText}</button>`;
+    });
+
+    html += `</div>`;
+    qContainer.innerHTML = html;
+
+    // Feedback & Navigation State
+    updateUIState(index);
+}
+
+// Handle User Selection
+function handleAnswer(selectedIndex) {
+    const qData = currentState.shuffledQs[currentState.qIndex];
+    
+    // Save Answer
+    currentState.answers[currentState.qIndex] = selectedIndex;
+
+    // Update Score
+    if (selectedIndex === qData.answer) {
+        currentState.score += 2; // Total 50 qs * 2 = 100 points
+        document.getElementById('score').innerText = `得分: ${currentState.score}`;
+    }
+
+    // Refresh UI to show colors and feedback
+    loadQuestion(currentState.qIndex);
+}
+
+// Update Feedback Box and Buttons
+function updateUIState(index) {
+    const qData = currentState.shuffledQs[index];
+    const feedbackBox = document.getElementById('feedback-box');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrev = document.getElementById('btn-prev');
+    const userAns = currentState.answers[index];
+
+    // Show Feedback if answered
+    if (userAns !== null) {
+        const isCorrect = userAns === qData.answer;
+        feedbackBox.style.display = 'block';
+        feedbackBox.className = `feedback ${isCorrect ? 'is-correct' : 'is-wrong'}`;
+        
+        // Get correct answer text (stripping HTML tags for cleaner display if needed, but innerHTML is fine)
+        const correctText = qData.options[qData.answer];
+
+        feedbackBox.innerHTML = `
+            <strong>${isCorrect ? '✅ 回答正确 (ถูกต้อง)' : '❌ 回答错误 (ตอบผิด)'}</strong>
+            <div style="margin-top:5px; color:#2C3E50;">正确答案: <b>${correctText}</b></div>
+            <div class="thai-expl">解析: ${qData.explain}</div>
+        `;
+        
+        // Enable Next button logic
+        btnNext.disabled = false;
+    } else {
+        feedbackBox.style.display = 'none';
+        btnNext.disabled = true;
+    }
+
+    // Button Logic
+    btnPrev.disabled = index === 0;
+    
+    if (index === questionsData.length - 1) {
+        btnNext.innerText = "查看结果 (ดูคะแนน)";
+    } else {
+        btnNext.innerText = "下一题 (ข้อถัดไป)";
+    }
+}
+
+// Navigation Handlers
+function nextQuestion() {
+    if (currentState.qIndex < questionsData.length - 1) {
+        loadQuestion(currentState.qIndex + 1);
+    } else {
+        showResult();
+    }
+}
+
+function prevQuestion() {
+    if (currentState.qIndex > 0) {
+        loadQuestion(currentState.qIndex - 1);
+    }
+}
+
+// Show Result Screen
+function showResult() {
+    document.getElementById('quiz-area').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    document.getElementById('final-score').innerText = currentState.score;
+}
+
+</script>
+
+</body>
+</html>
