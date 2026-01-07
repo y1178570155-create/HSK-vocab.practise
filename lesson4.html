@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4.地点与交通 - HSK练习</title>
+    <style>
+        :root {
+            --primary: #2980b9; /* 交通蓝 */
+            --secondary: #3498db;
+            --correct: #27ae60;
+            --wrong: #c0392b;
+            --bg: #ecf0f1;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+        }
+
+        /* 顶部导航 */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        h1 { margin: 0; font-size: 1.3rem; letter-spacing: 1px; }
+        .stats { margin-top: 8px; font-size: 0.95rem; opacity: 0.9; }
+
+        /* 内容区域 */
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 欢迎界面 */
+        .start-screen {
+            text-align: center;
+            margin: auto;
+        }
+        .start-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+        .btn-start {
+            background: var(--correct);
+            color: white;
+            border: none;
+            padding: 16px 45px;
+            font-size: 1.2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+            transition: transform 0.2s;
+            font-weight: bold;
+        }
+        .btn-start:active { transform: scale(0.95); }
+
+        /* 题目区域 */
+        .q-badge {
+            display: inline-block;
+            background: #d6eaf8;
+            color: var(--primary);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .q-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        /* 拼音标注样式 */
+        ruby { ruby-position: over; }
+        rt { font-size: 0.55em; color: #7f8c8d; font-weight: normal; user-select: none; }
+
+        /* 选项按钮 */
+        .options-grid { display: grid; gap: 12px; }
+        
+        .option-btn {
+            background: white;
+            border: 2px solid #eaeded;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #34495e;
+            position: relative;
+        }
+
+        .option-btn:hover:not(:disabled) { border-color: var(--primary); background: #f4f6f7; }
+
+        .option-btn.correct { background: #e8f8f5; border-color: var(--correct); color: #1e8449; }
+        .option-btn.wrong { background: #fdedec; border-color: var(--wrong); color: #c0392b; }
+        .option-btn:disabled { cursor: default; }
+
+        /* 解析区域 */
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 5px solid #bdc3c7;
+            display: none;
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .feedback.is-correct { border-left-color: var(--correct); background: #f0fff4; }
+        .feedback.is-wrong { border-left-color: var(--wrong); background: #fff5f5; }
+
+        .thai-expl { margin-top: 8px; font-size: 0.95rem; color: #555; }
+
+        /* 底部导航 */
+        .nav-buttons {
+            margin-top: auto;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+        .nav-btn.prev { background: #dfe6e9; color: #636e72; }
+        .nav-btn.next { background: var(--primary); color: white; box-shadow: 0 3px 10px rgba(41, 128, 185, 0.3); }
+        .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+        /* 结果页 */
+        .result-score { font-size: 3.5rem; color: var(--primary); margin: 20px 0; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>4.地点与交通</h1>
+        <div class="stats">
+            <span id="progress">题目: 0/35</span> | <span id="score">得分: 0</span>
+        </div>
+    </header>
+
+    <div class="content">
+        <div id="start-screen" class="start-screen">
+            <h2>HSK 词汇专项练习</h2>
+            <div class="start-info">
+                <p>📍 <strong>内容：</strong> 地点名词、交通工具、方位词、动词</p>
+                <p>📝 <strong>题量：</strong> 35 题 (35 ข้อ)</p>
+                <p>💯 <strong>满分：</strong> 70 分 (70 คะแนน)</p>
+                <p>💡 <strong>规则：</strong> 每题只有一个正确答案</p>
+            </div>
+            <button class="btn-start" onclick="app.startQuiz()">开始练习 (เริ่ม)</button>
+        </div>
+
+        <div id="quiz-area" style="display: none; height: 100%; flex-direction: column;">
+            <div id="question-container" style="flex-grow: 1;"></div>
+            
+            <div id="feedback-box" class="feedback"></div>
+
+            <div class="nav-buttons">
+                <button id="btn-prev" class="nav-btn prev" onclick="app.prevQuestion()" disabled>上一题</button>
+                <button id="btn-next" class="nav-btn next" onclick="app.nextQuestion()" disabled>下一题</button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="start-screen" style="display: none;">
+            <h2>练习完成 (เสร็จสิ้น)</h2>
+            <div class="result-score" id="final-score">0</div>
+            <p style="color: #7f8c8d;">满分 70 分</p>
+            <button class="btn-start" onclick="location.reload()" style="margin-top: 20px;">再练一次 (ทำอีกครั้ง)</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// 题目数据：每题2分，共35题
+// 已移除原题号：19, 29, 36, 39, 40
+const questionData = [
+    // --- Part 1: 拼音题 (1-10) ---
+    { q: "医院", options: ["yī yuàn", "yí yuàn", "yī yuán", "yì yuàn"], answer: 0, explain: "yī yuàn = โรงพยาบาล (Hospital)", isPinyin: true },
+    { q: "学校", options: ["xué xiào", "xué jiào", "xuě xiào", "xué xiāo"], answer: 0, explain: "xué xiào = โรงเรียน (School)", isPinyin: true },
+    { q: "机场", options: ["jī chǎng", "jī cháng", "jì chǎng", "qī chǎng"], answer: 0, explain: "jī chǎng = สนามบิน (Airport)", isPinyin: true },
+    { q: "飞机", options: ["fēi jī", "fěi jī", "huī jī", "fēi jí"], answer: 0, explain: "fēi jī = เครื่องบิน (Airplane)", isPinyin: true },
+    { q: "车站", options: ["chē zhàn", "cē zhàn", "chē zàn", "chē zhàng"], answer: 0, explain: "chē zhàn = สถานีรถ (Station)", isPinyin: true },
+    { q: "出租车", options: ["chū zū chē", "chū zhū chē", "cū zū chē", "chū zū cē"], answer: 0, explain: "chū zū chē = รถแท็กซี่ (Taxi)", isPinyin: true },
+    { q: "饭馆", options: ["fàn guǎn", "fàng guǎn", "fàn guān", "fàn guǎng"], answer: 0, explain: "fàn guǎn = ร้านอาหาร (Restaurant)", isPinyin: true },
+    { q: "商店", options: ["shāng diàn", "sāng diàn", "shāng dián", "sháng diàn"], answer: 0, explain: "shāng diàn = ร้านค้า (Shop)", isPinyin: true },
+    { q: "北京", options: ["Běi jīng", "Běi jīn", "Béi jīng", "Běi jǐng"], answer: 0, explain: "Běi jīng = ปักกิ่ง (Beijing)", isPinyin: true },
+    { q: "哪里", options: ["nǎ li", "nà li", "nǎ lǐ", "nǎ lī"], answer: 0, explain: "nǎ li = ที่ไหน (Where) *li 读轻声", isPinyin: true },
+
+    // --- Part 2: 地点与方位 (11-19) ---
+    { q: "我要去____买衣服。", options: ["<ruby>商店<rt>shāngdiàn</rt></ruby>", "<ruby>书店<rt>shūdiàn</rt></ruby>", "<ruby>饭馆<rt>fànguǎn</rt></ruby>", "<ruby>医院<rt>yīyuàn</rt></ruby>"], answer: 0, explain: "ซื้อเสื้อผ้าต้องไป 'ร้านค้า' (shāngdiàn)", isPinyin: false },
+    { q: "老师在____里上课。", options: ["<ruby>教室<rt>jiàoshì</rt></ruby>", "<ruby>家里<rt>jiālǐ</rt></ruby>", "<ruby>商店<rt>shāngdiàn</rt></ruby>", "<ruby>车上<rt>chēshang</rt></ruby>"], answer: 0, explain: "ครูสอนหนังสือใน 'ห้องเรียน' (jiàoshì)", isPinyin: false },
+    { q: "医生在____工作。", options: ["<ruby>医院<rt>yīyuàn</rt></ruby>", "<ruby>学校<rt>xuéxiào</rt></ruby>", "<ruby>饭馆<rt>fànguǎn</rt></ruby>", "<ruby>车站<rt>chēzhàn</rt></ruby>"], answer: 0, explain: "หมอทำงานที่ 'โรงพยาบาล' (yīyuàn)", isPinyin: false },
+    { q: "请问，洗手间在____？", options: ["<ruby>哪儿<rt>nǎr</rt></ruby>", "<ruby>这儿<rt>zhèr</rt></ruby>", "<ruby>那儿<rt>nàr</rt></ruby>", "<ruby>什么<rt>shénme</rt></ruby>"], answer: 0, explain: "ถามสถานที่ใช้ 'ที่ไหน' (nǎr)", isPinyin: false },
+    { q: "学校在饭馆的____。", options: ["<ruby>旁边<rt>pángbiān</rt></ruby>", "<ruby>里边<rt>lǐbian</rt></ruby>", "<ruby>上边<rt>shàngbian</rt></ruby>", "<ruby>长<rt>cháng</rt></ruby>"], answer: 0, explain: "โรงเรียนอยู่ 'ข้างๆ' ร้านอาหาร (pángbiān)", isPinyin: false },
+    { q: "桌子____有一本书。", options: ["<ruby>上<rt>shang</rt></ruby>", "<ruby>中<rt>zhōng</rt></ruby>", "<ruby>北<rt>běi</rt></ruby>", "<ruby>高<rt>gāo</rt></ruby>"], answer: 0, explain: "หนังสืออยู่ 'บน' โต๊ะ (zhuōzi shang)", isPinyin: false },
+    { q: "我家____学校很近。", options: ["<ruby>离<rt>lí</rt></ruby>", "<ruby>从<rt>cóng</rt></ruby>", "<ruby>在<rt>zài</rt></ruby>", "<ruby>去<rt>qù</rt></ruby>"], answer: 0, explain: "บอกระยะห่าง A ห่างจาก B ใช้ 'lí' (离)", isPinyin: false },
+    { q: "中国在泰国的____。", options: ["<ruby>北边<rt>běibian</rt></ruby>", "<ruby>南边<rt>nánbian</rt></ruby>", "<ruby>下边<rt>xiàbian</rt></ruby>", "<ruby>里边<rt>lǐbian</rt></ruby>"], answer: 0, explain: "จีนอยู่ทาง 'ทิศเหนือ' ของไทย (běibian)", isPinyin: false },
+    // 原第19题已删除
+    { q: "椅子在桌子的____。", options: ["<ruby>下面<rt>xiàmiàn</rt></ruby>", "<ruby>上面<rt>shàngmiàn</rt></ruby>", "<ruby>里面<rt>lǐmiàn</rt></ruby>", "<ruby>大<rt>dà</rt></ruby>"], answer: 0, explain: "บริบทนี้เก้าอี้มักจะสอดอยู่ 'ใต้' หรืออยู่คู่กับโต๊ะ แต่ตัวเลือกอื่นเป็นไปไม่ได้ทางกายภาพ (บนโต๊ะ/ในโต๊ะ)", isPinyin: false },
+
+    // --- Part 3: 交通与动词 (20-28) ---
+    { q: "我是____公共汽车来的。", options: ["<ruby>坐<rt>zuò</rt></ruby>", "<ruby>做<rt>zuò</rt></ruby>", "<ruby>打<rt>dǎ</rt></ruby>", "<ruby>开<rt>kāi</rt></ruby>"], answer: 0, explain: "โดยสารรถเมล์ใช้กริยา 'นั่ง' (zuò)", isPinyin: false },
+    { q: "爸爸喜欢____车去工作。", options: ["<ruby>开<rt>kāi</rt></ruby>", "<ruby>坐<rt>zuò</rt></ruby>", "<ruby>打<rt>dǎ</rt></ruby>", "<ruby>跑<rt>pǎo</rt></ruby>"], answer: 0, explain: "ขับรถเองใช้ 'kāi' (开)", isPinyin: false },
+    { q: "我们要去____飞机去北京。", options: ["<ruby>坐<rt>zuò</rt></ruby>", "<ruby>站<rt>zhàn</rt></ruby>", "<ruby>开<rt>kāi</rt></ruby>", "<ruby>骑<rt>qí</rt></ruby>"], answer: 0, explain: "โดยสารเครื่องบินใช้ 'นั่ง' (zuò)", isPinyin: false },
+    { q: "我不喜欢走路，我喜欢____自行车。", options: ["<ruby>骑<rt>qí</rt></ruby>", "<ruby>坐<rt>zuò</rt></ruby>", "<ruby>开<rt>kāi</rt></ruby>", "<ruby>打<rt>dǎ</rt></ruby>"], answer: 0, explain: "ขี่จักรยาน ใช้ 'qí' (ขี่)", isPinyin: false },
+    { q: "太晚了，我们____出租车回家吧。", options: ["<ruby>打<rt>dǎ</rt></ruby>", "<ruby>开<rt>kāi</rt></ruby>", "<ruby>骑<rt>qí</rt></ruby>", "<ruby>做<rt>zuò</rt></ruby>"], answer: 0, explain: "เรียกรถแท็กซี่ใช้คำว่า 'dǎ chē' (打车)", isPinyin: false },
+    { q: "他在火车站____火车。", options: ["<ruby>等<rt>děng</rt></ruby>", "<ruby>开<rt>kāi</rt></ruby>", "<ruby>去<rt>qù</rt></ruby>", "<ruby>在<rt>zài</rt></ruby>"], answer: 0, explain: "รอรถไฟ ใช้ 'děng' (รอ)", isPinyin: false },
+    { q: "从这里到机场____去？", options: ["<ruby>怎么<rt>zěnme</rt></ruby>", "<ruby>什么<rt>shénme</rt></ruby>", "<ruby>多少<rt>duōshao</rt></ruby>", "<ruby>哪儿<rt>nǎr</rt></ruby>"], answer: 0, explain: "ถามวิธีการเดินทางใช้ 'zěnme' (อย่างไร)", isPinyin: false },
+    { q: "你____什么时候回中国？", options: ["<ruby>想<rt>xiǎng</rt></ruby>", "<ruby>去<rt>qù</rt></ruby>", "<ruby>在<rt>zài</rt></ruby>", "<ruby>从<rt>cóng</rt></ruby>"], answer: 0, explain: "คุณ 'คิด/วางแผน' จะกลับจีนเมื่อไหร่ (xiǎng)", isPinyin: false },
+    // 原第29题已删除
+    { q: "我要去中国____。", options: ["<ruby>旅游<rt>lǚyóu</rt></ruby>", "<ruby>车站<rt>chēzhàn</rt></ruby>", "<ruby>机票<rt>jīpiào</rt></ruby>", "<ruby>路<rt>lù</rt></ruby>"], answer: 0, explain: "ไปประเทศจีนเพื่อ 'ท่องเที่ยว' (lǚyóu) - คำอื่นเป็นคำนามที่ไม่เข้ากับรูปประโยค", isPinyin: false },
+
+    // --- Part 4: 语法与情景逻辑 (29-35) ---
+    { q: "我____中国来。", options: ["<ruby>从<rt>cóng</rt></ruby>", "<ruby>离<rt>lí</rt></ruby>", "<ruby>在<rt>zài</rt></ruby>", "<ruby>比<rt>bǐ</rt></ruby>"], answer: 0, explain: "บอกจุดเริ่มต้น 'จาก' ประเทศจีน ใช้ 'cóng' (从)", isPinyin: false },
+    { q: "他在房间____睡觉。", options: ["<ruby>里<rt>li</rt></ruby>", "<ruby>上<rt>shang</rt></ruby>", "<ruby>下<rt>xià</rt></ruby>", "<ruby>外<rt>wài</rt></ruby>"], answer: 0, explain: "ในห้อง ใช้ 'fángjiān li'", isPinyin: false },
+    { q: "A: 你去哪儿？<br>B: 我____学校。", options: ["<ruby>去<rt>qù</rt></ruby>", "<ruby>来<rt>lái</rt></ruby>", "<ruby>在<rt>zài</rt></ruby>", "<ruby>从<rt>cóng</rt></ruby>"], answer: 0, explain: "ถามไปไหน ตอบ 'ไป' โรงเรียน (qù)", isPinyin: false },
+    { q: "A: 你在哪儿？<br>B: 我____家。", options: ["<ruby>在<rt>zài</rt></ruby>", "<ruby>去<rt>qù</rt></ruby>", "<ruby>来<rt>lái</rt></ruby>", "<ruby>回<rt>huí</rt></ruby>"], answer: 0, explain: "ถามอยู่ที่ไหน ตอบ 'อยู่' บ้าน (zài)", isPinyin: false },
+    { q: "A: 我们几点去吃饭？<br>B: ____去吧。", options: ["<ruby>现在<rt>xiànzài</rt></ruby>", "<ruby>昨天<rt>zuótiān</rt></ruby>", "<ruby>哪里<rt>nǎlǐ</rt></ruby>", "<ruby>这里<rt>zhèlǐ</rt></ruby>"], answer: 0, explain: "ชวนไปกินข้าว 'ตอนนี้' เลยเถอะ (xiànzài)", isPinyin: false },
+    // 原第36题已删除
+    { q: "我家在公司的____。", options: ["<ruby>后面<rt>hòumiàn</rt></ruby>", "<ruby>上面<rt>shàngmiàn</rt></ruby>", "<ruby>里面<rt>lǐmiàn</rt></ruby>", "<ruby>小<rt>xiǎo</rt></ruby>"], answer: 0, explain: "บ้านอยู่ 'ด้านหลัง' บริษัท (hòumiàn) เป็นตำแหน่งที่สมเหตุสมผลที่สุด", isPinyin: false },
+    { q: "路上____多车。", options: ["<ruby>很<rt>hěn</rt></ruby>", "<ruby>是<rt>shì</rt></ruby>", "<ruby>有<rt>yǒu</rt></ruby>", "<ruby>在<rt>zài</rt></ruby>"], answer: 0, explain: "บนถนน 'มี' รถเยอะ (yǒu hěn duō chē)", isPinyin: false }
+    // 原第39题已删除
+    // 原第40题已删除
+];
+
+// --- 应用程序逻辑 ---
+const app = {
+    currentIndex: 0,
+    score: 0,
+    answers: new Array(questionData.length).fill(null), // 记录用户答案
+    shuffledQs: [], // 存储处理后的题目（选项已打乱）
+
+    // 初始化
+    startQuiz: function() {
+        // 1. 深度处理题目数据：保持题目顺序，但打乱选项顺序
+        this.shuffledQs = questionData.map((item, index) => {
+            // 创建选项索引数组 [0, 1, 2, 3]
+            let indices = [0, 1, 2, 3];
+            // Fisher-Yates 洗牌算法打乱索引
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            return {
+                ...item,
+                originalIndex: index,
+                shuffledIndices: indices // 保存打乱后的选项顺序
+            };
+        });
+
+        this.currentIndex = 0;
+        this.score = 0;
+        this.answers.fill(null);
+
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'none';
+        document.getElementById('quiz-area').style.display = 'flex';
+        document.getElementById('score').innerText = '得分: 0';
+        
+        this.renderQuestion();
+    },
+
+    // 渲染题目
+    renderQuestion: function() {
+        const index = this.currentIndex;
+        const q = this.shuffledQs[index];
+        const container = document.getElementById('question-container');
+        
+        // 更新进度
+        document.getElementById('progress').innerText = `题目: ${index + 1}/${questionData.length}`;
+
+        // 确定题目类型标签
+        let badgeText = q.isPinyin ? "拼音测试 (Pinyin)" : "词汇与语法 (Vocab & Grammar)";
+        
+        // 构建HTML
+        let html = `
+            <div class="q-badge">${badgeText}</div>
+            <div class="q-text">${index + 1}. ${q.q}</div>
+            <div class="options-grid">
+        `;
+
+        // 根据打乱的索引渲染选项
+        q.shuffledIndices.forEach(optIndex => {
+            const optText = q.options[optIndex];
+            const userChoice = this.answers[index];
+            
+            let btnClass = "option-btn";
+            let disabledAttr = "";
+            let clickHandler = `onclick="app.handleAnswer(${optIndex})"`;
+
+            // 如果已作答，显示状态
+            if (userChoice !== null) {
+                disabledAttr = "disabled";
+                clickHandler = "";
+                if (optIndex === q.answer) {
+                    btnClass += " correct"; // 正确答案总是绿色
+                } else if (userChoice === optIndex) {
+                    btnClass += " wrong"; // 用户选错的显示红色
+                }
+            }
+
+            html += `<button class="${btnClass}" ${disabledAttr} ${clickHandler}>${optText}</button>`;
+        });
+
+        html += `</div>`;
+        container.innerHTML = html;
+
+        this.updateFeedbackAndNav();
+    },
+
+    // 处理用户点击
+    handleAnswer: function(selectedIndex) {
+        if (this.answers[this.currentIndex] !== null) return; // 防止重复点击
+
+        const q = this.shuffledQs[this.currentIndex];
+        this.answers[this.currentIndex] = selectedIndex;
+
+        // 计分 (每题2分)
+        if (selectedIndex === q.answer) {
+            this.score += 2;
+            document.getElementById('score').innerText = `得分: ${this.score}`;
+        }
+
+        // 重新渲染以显示颜色和解析
+        this.renderQuestion();
+    },
+
+    // 更新解析区和导航按钮状态
+    updateFeedbackAndNav: function() {
+        const index = this.currentIndex;
+        const userChoice = this.answers[index];
+        const q = this.shuffledQs[index];
+        
+        const feedbackBox = document.getElementById('feedback-box');
+        const nextBtn = document.getElementById('btn-next');
+        const prevBtn = document.getElementById('btn-prev');
+
+        // 解析显示逻辑
+        if (userChoice !== null) {
+            const isCorrect = (userChoice === q.answer);
+            feedbackBox.style.display = 'block';
+            feedbackBox.className = `feedback ${isCorrect ? 'is-correct' : 'is-wrong'}`;
+            
+            // 获取正确答案文本（去除HTML标签用于显示纯文本）
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = q.options[q.answer];
+            const correctText = tempDiv.innerText;
+
+            feedbackBox.innerHTML = `
+                <strong>${isCorrect ? '✅ 回答正确 (ถูกต้อง)' : '❌ 回答错误 (ตอบผิด)'}</strong>
+                <div style="margin-top: 5px;">正确答案: <b>${correctText}</b></div>
+                <div class="thai-expl">解析: ${q.explain}</div>
+            `;
+            nextBtn.disabled = false;
+        } else {
+            feedbackBox.style.display = 'none';
+            nextBtn.disabled = true;
+        }
+
+        // 按钮状态
+        prevBtn.disabled = (index === 0);
+        
+        if (index === questionData.length - 1) {
+            nextBtn.innerText = "查看成绩 (ดูคะแนน)";
+        } else {
+            nextBtn.innerText = "下一题 (ข้อถัดไป)";
+        }
+    },
+
+    // 下一题
+    nextQuestion: function() {
+        if (this.currentIndex < questionData.length - 1) {
+            this.currentIndex++;
+            this.renderQuestion();
+        } else {
+            this.showResult();
+        }
+    },
+
+    // 上一题
+    prevQuestion: function() {
+        if (this.currentIndex > 0) {
+            this.currentIndex--;
+            this.renderQuestion();
+        }
+    },
+
+    // 显示结果
+    showResult: function() {
+        document.getElementById('quiz-area').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('final-score').innerText = this.score;
+    }
+};
+
+</script>
+
+</body>
+</html>
