@@ -2,51 +2,182 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>HSK 词汇练习</title>
+  <title>HSK 词汇练习 | HSK Vocabulary Practice</title>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
-      padding: 40px;
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #fdfcf7, #f2f6ee);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
+
+    .container {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+      text-align: center;
+    }
+
     h1 {
-      text-align: center;
+      margin-bottom: 6px;
+      font-size: 28px;
+      color: #333;
     }
-    .lesson {
-      max-width: 400px;
-      margin: 20px auto;
+
+    .en-title {
+      font-size: 16px;
+      color: #888;
+      margin-bottom: 20px;
     }
-    a {
+
+    .subtitle {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 4px;
+    }
+
+    .en-subtitle {
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 30px;
+    }
+
+    /* 每一课的卡片 */
+    .lesson-card {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .lesson-card a {
       display: block;
-      padding: 15px;
-      margin: 10px 0;
-      background: #4CAF50;
-      color: white;
+      padding: 14px;
+      background: linear-gradient(135deg, #fff2b2, #ffe08a);
+      color: #5c4b00;
       text-decoration: none;
-      text-align: center;
-      border-radius: 8px;
       font-size: 18px;
+      border-radius: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
     }
-    a:hover {
-      background: #45a049;
+
+    .lesson-card a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+    }
+
+    .lesson-desc {
+      margin-top: 6px;
+      padding-left: 6px;
+      font-size: 14px;
+      color: #777;
+      line-height: 1.4;
+    }
+
+    .lesson-desc span {
+      color: #999;
+      font-size: 13px;
+      display: block;
+    }
+
+    footer {
+      margin-top: 25px;
+      font-size: 13px;
+      color: #aaa;
     }
   </style>
 </head>
+
 <body>
 
-<h1>HSK 词汇练习</h1>
-<p style="text-align:center;">请选择你要练习的课程</p>
+  <div class="container">
 
-<div class="lesson">
-  <a href="lesson1.html">lesson1</a>
-  <a href="lesson2.html">lesson2</a>
-  <a href="lesson3.html">lesson3</a>
-  <a href="lesson4.html">lesson4</a>
-  <a href="lesson5.html">lesson5</a>
-  <a href="lesson6.html">lesson6</a>
-  <a href="lesson7.html">lesson7</a>
-  <a href="lesson8.html">lesson8</a>
-</div>
+    <h1>HSK 词汇练习</h1>
+    <div class="en-title">HSK Vocabulary Practice</div>
+
+    <div class="subtitle">请选择你要练习的课程</div>
+    <div class="en-subtitle">Please choose a lesson to practice</div>
+
+    <!-- Lesson list -->
+    <div class="lesson-card">
+      <a href="lesson1.html">📘 第 1 课 Lesson 1</a>
+      <div class="lesson-desc">
+        人物、职业
+        <span>People & Occupations</span>
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <a href="lesson2.html">📘 第 2 课 Lesson 2</a>
+      <div class="lesson-desc">
+        日常生活、动词
+        <span>Daily Life & Verbs</span>
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <a href="lesson3.html">📘 第 3 课 Lesson 3</a>
+      <div class="lesson-desc">
+        时间、数量
+        <span>Time & Numbers</span>
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <a href="lesson4.html">📘 第 4 课 Lesson 4</a>
+      <div class="lesson-desc">
+        地点、交通
+        <span>Places & Transportation</span>
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <a href="lesson5.html">📘 第 5 课 Lesson 5</a>
+      <div class="lesson-desc">
+        情感、状态、身体
+        <span>Feelings, States & Body</span>
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <a href="lesson6.html">📘 第 6 课 Lesson 6</a>
+      <div class="lesson-desc">
+        能愿动词、判断
+        <span>Modal Verbs & Judgement</span>
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <a href="lesson7.html">📘 第 7 课 Lesson 7</a>
+      <div class="lesson-desc">
+        功能词、核心语法
+        <span>Function Words & Core Grammar</span>
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <a href="lesson8.html">📘 第 8 课 Lesson 8</a>
+      <div class="lesson-desc">
+        学习、工作
+        <span>Study & Work</span>
+      </div>
+    </div>
+
+    <footer>
+      © HSK Vocabulary Practice
+    </footer>
+
+  </div>
 
 </body>
 </html>
