@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSK 3级 - 1.人物与社会身份</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: "Sarabun", "Helvetica Neue", Helvetica, Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 600px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-height: 100vh; display: flex; flex-direction: column; }
+        
+        /* 顶部导航 */
+        .top-bar { background-color: #4a90e2; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .score-badge { background: white; color: #4a90e2; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 16px; }
+        .q-counter { font-size: 14px; opacity: 0.9; }
+
+        /* 欢迎屏幕 */
+        #start-screen { padding: 40px 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 80vh; }
+        h1 { color: #333; margin-bottom: 10px; }
+        .subtitle { color: #666; margin-bottom: 40px; }
+        .start-btn { background: #4a90e2; color: white; font-size: 20px; padding: 15px 40px; border: none; border-radius: 50px; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 10px rgba(74, 144, 226, 0.4); }
+        .start-btn:active { transform: scale(0.95); }
+
+        /* 题目区域 */
+        #quiz-screen { display: none; padding: 20px; padding-bottom: 80px; }
+        .question-card { margin-bottom: 20px; }
+        .q-type { font-size: 12px; color: #888; background: #eee; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+        .q-text { font-size: 20px; font-weight: bold; color: #2c3e50; line-height: 1.6; margin-bottom: 5px; }
+        .q-pinyin { font-size: 16px; color: #7f8c8d; margin-bottom: 20px; font-style: italic; }
+        
+        /* 选项 */
+        .options-grid { display: flex; flex-direction: column; gap: 12px; }
+        .option-btn { background: #fff; border: 2px solid #e0e0e0; padding: 15px; border-radius: 10px; text-align: left; font-size: 17px; cursor: pointer; transition: all 0.2s; position: relative; color: #333; }
+        .option-btn:hover { background-color: #f8f9fa; border-color: #bdc3c7; }
+        
+        /* 状态颜色 */
+        .option-btn.correct { background-color: #d4edda; border-color: #28a745; color: #155724; }
+        .option-btn.wrong { background-color: #f8d7da; border-color: #dc3545; color: #721c24; }
+        .option-btn.disabled { pointer-events: none; opacity: 0.9; }
+        
+        /* 解析区域 */
+        .feedback-box { margin-top: 20px; padding: 15px; border-radius: 8px; background: #e8f4fd; border-left: 5px solid #4a90e2; display: none; }
+        .thai-expl { margin-top: 8px; color: #555; font-size: 15px; }
+
+        /* 底部导航按钮 */
+        .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); display: flex; justify-content: center; gap: 15px; max-width: 600px; margin: 0 auto; display: none; }
+        .nav-btn { padding: 12px 25px; border-radius: 8px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; flex: 1; }
+        .btn-prev { background: #ecf0f1; color: #7f8c8d; }
+        .btn-next { background: #4a90e2; color: white; display: none; }
+
+        /* 结果页 */
+        #result-screen { display: none; text-align: center; padding: 40px 20px; }
+        .final-score { font-size: 60px; font-weight: bold; color: #4a90e2; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div id="start-screen">
+        <h1>1. 人物与社会身份</h1>
+        <div class="subtitle">HSK 3级 词汇练习 (由简入难)</div>
+        <div style="background:#eef2f7; padding:20px; border-radius:10px; margin-bottom:30px; text-align:left;">
+            <p>📊 题目数量：<strong>40 题</strong></p>
+            <p>💯 满分：<strong>40 分</strong></p>
+            <p>📈 难度：<strong>拼音基础 → 语境理解</strong></p>
+        </div>
+        <button class="start-btn" onclick="startQuiz()">开始练习 (Start)</button>
+    </div>
+
+    <div id="quiz-screen">
+        <div class="top-bar">
+            <span class="q-counter" id="q-progress">1 / 40</span>
+            <div class="score-badge">得分: <span id="current-score">0</span></div>
+        </div>
+
+        <div class="question-card">
+            <span class="q-type" id="q-type-label">词汇理解</span>
+            <div class="q-text" id="q-text">题目加载中...</div>
+            <div class="q-pinyin" id="q-pinyin"></div>
+        </div>
+
+        <div class="options-grid" id="options-container">
+            </div>
+
+        <div class="feedback-box" id="feedback-box">
+            <div id="feedback-content"></div>
+        </div>
+    </div>
+
+    <div class="footer-nav" id="footer-nav">
+        <button class="nav-btn btn-prev" id="btn-prev" onclick="prevQuestion()">上一题 (Prev)</button>
+        <button class="nav-btn btn-next" id="btn-next" onclick="nextQuestion()">下一题 (Next)</button>
+    </div>
+
+    <div id="result-screen">
+        <h2>练习完成! (Completed)</h2>
+        <p>你的最终得分</p>
+        <div class="final-score" id="final-score-display">0</div>
+        <p style="color:#666;">请截图发送给老师</p>
+        <button class="start-btn" onclick="location.reload()" style="margin-top:20px;">再做一次 (Retry)</button>
+    </div>
+
+</div>
+
+<script>
+/**
+ * 题目数据 - 按难度排序
+ * Part 1: Type 2 (看字选拼音) - 基础
+ * Part 2: Type 1 (语境选词，带拼音) - 进阶
+ */
+const rawQuestions = [
+    // ============================================
+    // PART 1: 拼音辨识 (Simple Recognition)
+    // ============================================
+    { q: "请选择“爷爷”的拼音：", p: "", type: 2,
+      opts: ["yéye", "yěye", "bàba", "yèye"], ans: "yéye", t: "爷爷 (yéye) คุณปู่ (注意: 第二个字轻声)" },
+
+    { q: "请选择“奶奶”的拼音：", p: "", type: 2,
+      opts: ["nǎinai", "nāinai", "māma", "nàinai"], ans: "nǎinai", t: "奶奶 (nǎinai) คุณย่า" },
+
+    { q: "请选择“阿姨”的拼音：", p: "", type: 2,
+      opts: ["āyí", "āyì", "áyí", "àyí"], ans: "āyí", t: "阿姨 (āyí) คุณน้า/ป้า" },
+
+    { q: "请选择“叔叔”的拼音：", p: "", type: 2,
+      opts: ["shūshu", "sūshu", "shúshu", "jiùjiu"], ans: "shūshu", t: "叔叔 (shūshu) คุณอาผู้ชาย" },
+
+    { q: "请选择“经理”的拼音：", p: "", type: 2,
+      opts: ["jīnglǐ", "jīnglì", "jìnglǐ", "jīnlǐ"], ans: "jīnglǐ", t: "经理 (jīnglǐ) ผู้จัดการ" },
+
+    { q: "请选择“司机”的拼音：", p: "", type: 2,
+      opts: ["sījī", "shījī", "sìjī", "sījì"], ans: "sījī", t: "司机 (sījī) คนขับรถ" },
+
+    { q: "请选择“校长”的拼音：", p: "", type: 2,
+      opts: ["xiàozhǎng", "xiàocháng", "xiǎozhǎng", "xiàozhang"], ans: "xiàozhǎng", t: "校长 (xiàozhǎng) ครูใหญ่ (注意: 长读 zhǎng)" },
+
+    { q: "请选择“同事”的拼音：", p: "", type: 2,
+      opts: ["tóngshì", "tóngxué", "tòngshì", "tóngshí"], ans: "tóngshì", t: "同事 (tóngshì) เพื่อนร่วมงาน" },
+
+    { q: "请选择“邻居”的拼音：", p: "", type: 2,
+      opts: ["línjū", "língjū", "línjú", "língjú"], ans: "línjū", t: "邻居 (línjū) เพื่อนบ้าน (注意: lín 是前鼻音)" },
+
+    { q: "请选择“客人”的拼音：", p: "", type: 2,
+      opts: ["kèrén", "kērén", "kèrěn", "gèrén"], ans: "kèrén", t: "客人 (kèrén) แขก" },
+
+    { q: "请选择“自己”的拼音：", p: "", type: 2,
+      opts: ["zìjǐ", "zhìjǐ", "zìjī", "zìjí"], ans: "zìjǐ", t: "自己 (zìjǐ) ตนเอง" },
+
+    { q: "请选择“身体”的拼音：", p: "", type: 2,
+      opts: ["shēntǐ", "shēntī", "shéntǐ", "sēntǐ"], ans: "shēntǐ", t: "身体 (shēntǐ) ร่างกาย" },
+
+    { q: "请选择“名字”的拼音：", p: "", type: 2,
+      opts: ["míngzi", "míngzì", "mínzi", "mìngzi"], ans: "míngzi", t: "名字 (míngzi) ชื่อ" },
+
+    { q: "请选择“服务员”的拼音：", p: "", type: 2,
+      opts: ["fúwùyuán", "fūwùyuán", "fúwùyuǎn", "fúwùyúan"], ans: "fúwùyuán", t: "服务员 (fúwùyuán) พนักงานบริการ" },
+
+    { q: "请选择“愿意”的拼音：", p: "", type: 2,
+      opts: ["yuànyì", "yuányì", "yuànyi", "yuányi"], ans: "yuànyì", t: "愿意 (yuànyì) สมัครใจ/ยอม" },
+
+    // ============================================
+    // PART 2: 语境与逻辑 (Meaning & Context)
+    // ============================================
+    { q: "爸爸的爸爸，你应该叫他什么？", p: "Bàba de bàba, nǐ yīnggāi jiào tā shénme?", type: 1, 
+      opts: ["爷爷 (yéye)", "奶奶 (nǎinai)", "叔叔 (shūshu)", "阿姨 (āyí)"], ans: "爷爷 (yéye)", t: "พ่อของพ่อ เรียกว่า '爷爷' (ปู่)" },
+
+    { q: "妈妈的姐妹，我应该叫她______。", p: "Māma de jiěmèi, wǒ yīnggāi jiào tā ______.", type: 1,
+      opts: ["阿姨 (āyí)", "奶奶 (nǎinai)", "爷爷 (yéye)", "叔叔 (shūshu)"], ans: "阿姨 (āyí)", t: "พี่สาวหรือน้องสาวของแม่ เรียกว่า '阿姨' (น้า/ป้า)" },
+
+    { q: "爸爸的弟弟叫______。", p: "Bàba de dìdi jiào ______.", type: 1,
+      opts: ["叔叔 (shūshu)", "舅舅 (jiùjiu)", "爷爷 (yéye)", "哥哥 (gēge)"], ans: "叔叔 (shūshu)", t: "น้องชายของพ่อ เรียกว่า '叔叔' (อาผู้ชาย)" },
+
+    { q: "我是男孩，弟弟比我小，我是弟弟的______。", p: "Wǒ shì nánhái, dìdi bǐ wǒ xiǎo, wǒ shì dìdi de ______.", type: 1,
+      opts: ["哥哥 (gēge)", "姐姐 (jiějie)", "弟弟 (dìdi)", "妹妹 (mèimei)"], ans: "哥哥 (gēge)", t: "ฉันเป็นผู้ชายและโตกว่าน้องชาย ฉันคือ '哥哥' (พี่ชาย)" },
+
+    { q: "儿子和______都在上小学。", p: "Érzi hé ______ dōu zài shàng xiǎoxué.", type: 1,
+      opts: ["女儿 (nǚ'ér)", "爸爸 (bàba)", "妈妈 (māma)", "爷爷 (yéye)"], ans: "女儿 (nǚ'ér)", t: "คู่กับลูกชาย (儿子) คือ '女儿' (ลูกสาว)" },
+
+    { q: "她是我的______，我们结婚十年了。", p: "Tā shì wǒ de ______, wǒmen jiéhūn shí nián le.", type: 1,
+      opts: ["妻子 (qīzi)", "同学 (tóngxué)", "女儿 (nǚ'ér)", "姐姐 (jiějie)"], ans: "妻子 (qīzi)", t: "ผู้หญิงที่แต่งงานด้วยคือ '妻子' (ภรรยา)" },
+
+    { q: "我是他的妻子，他是我的______。", p: "Wǒ shì tā de qīzi, tā shì wǒ de ______.", type: 1,
+      opts: ["丈夫 (zhàngfu)", "哥哥 (gēge)", "弟弟 (dìdi)", "朋友 (péngyou)"], ans: "丈夫 (zhàngfu)", t: "คู่กับภรรยาคือ '丈夫' (สามี)" },
+
+    { q: "爸爸的妈妈叫______。", p: "Bàba de māma jiào ______.", type: 1,
+      opts: ["奶奶 (nǎinai)", "阿姨 (āyí)", "妈妈 (māma)", "姐姐 (jiějie)"], ans: "奶奶 (nǎinai)", t: "แม่ของพ่อคือ '奶奶' (ย่า)" },
+
+    { q: "我们是一家人，我有两个______。", p: "Wǒmen shì yìjiārén, wǒ yǒu liǎng gè ______.", type: 1,
+      opts: ["孩子 (háizi)", "服务员 (fúwùyuán)", "邻居 (línjū)", "经理 (jīnglǐ)"], ans: "孩子 (háizi)", t: "在家庭里有 '孩子' (ลูก/เด็ก)" },
+
+    { q: "在饭店里，给我们上菜的人是______。", p: "Zài fàndiàn lǐ, gěi wǒmen shàngcài de rén shì ______.", type: 1,
+      opts: ["服务员 (fúwùyuán)", "医生 (yīshēng)", "老师 (lǎoshī)", "经理 (jīnglǐ)"], ans: "服务员 (fúwùyuán)", t: "พนักงานเสิร์ฟคือ '服务员' (พนักงานบริการ)" },
+
+    { q: "谁在学校工作？", p: "Shéi zài xuéxiào gōngzuò?", type: 1,
+      opts: ["校长 (xiàozhǎng)", "司机 (sījī)", "医生 (yīshēng)", "服务员 (fúwùyuán)"], ans: "校长 (xiàozhǎng)", t: "คนที่ทำงานที่โรงเรียนคือ '校长' (ครูใหญ่)" },
+
+    { q: "我生病了，要去医院看______。", p: "Wǒ shēngbìng le, yào qù yīyuàn kàn ______.", type: 1,
+      opts: ["医生 (yīshēng)", "老师 (lǎoshī)", "司机 (sījī)", "经理 (jīnglǐ)"], ans: "医生 (yīshēng)", t: "ป่วยต้องไปหา '医生' (หมอ)" },
+
+    { q: "开出租车或者公共汽车的人是______。", p: "Kāi chūzūchē huòzhě gōnggòngqìchē de rén shì ______.", type: 1,
+      opts: ["司机 (sījī)", "经理 (jīnglǐ)", "服务员 (fúwùyuán)", "乘客 (chéngkè)"], ans: "司机 (sījī)", t: "คนขับรถคือ '司机' (คนขับรถ)" },
+
+    { q: "王______是这家公司的负责人。", p: "Wáng ______ shì zhè jiā gōngsī de fùzérén.", type: 1,
+      opts: ["经理 (jīnglǐ)", "孩子 (háizi)", "同学 (tóngxué)", "医生 (yīshēng)"], ans: "经理 (jīnglǐ)", t: "ผู้รับผิดชอบบริษัทคือ '经理' (ผู้จัดการ)" },
+
+    { q: "______是教学生学习的人。", p: "______ shì jiāo xuésheng xuéxí de rén.", type: 1,
+      opts: ["老师 (lǎoshī)", "学生 (xuésheng)", "医生 (yīshēng)", "服务员 (fúwùyuán)"], ans: "老师 (lǎoshī)", t: "คนสอนนักเรียนคือ '老师' (คุณครู)" },
+
+    { q: "对年轻未婚女性的尊称是______。", p: "Duì niánqīng wèihūn nǚxìng de zūnchēng shì ______.", type: 1,
+      opts: ["小姐 (xiǎojiě)", "先生 (xiānsheng)", "阿姨 (āyí)", "奶奶 (nǎinai)"], ans: "小姐 (xiǎojiě)", t: "คำเรียกหญิงสาวคือ '小姐' (คุณผู้หญิง/นางสาว)" },
+
+    { q: "对男士的尊称是______。", p: "Duì nánshì de zūnchēng shì ______.", type: 1,
+      opts: ["先生 (xiānsheng)", "小姐 (xiǎojiě)", "阿姨 (āyí)", "孩子 (háizi)"], ans: "先生 (xiānsheng)", t: "คำเรียกผู้ชายอย่างสุภาพคือ '先生' (คุณผู้ชาย)" },
+
+    { q: "我们在同一个公司工作，他是我的______。", p: "Wǒmen zài tóng yí gè gōngsī gōngzuò, tā shì wǒ de ______.", type: 1,
+      opts: ["同事 (tóngshì)", "同学 (tóngxué)", "邻居 (línjū)", "客人 (kèrén)"], ans: "同事 (tóngshì)", t: "คนที่ทำงานด้วยกันคือ '同事' (เพื่อนร่วมงาน)" },
+
+    { q: "他和我在同一个班学习，他是我的______。", p: "Tā hé wǒ zài tóng yí gè bān xuéxí, tā shì wǒ de ______.", type: 1,
+      opts: ["同学 (tóngxué)", "同事 (tóngshì)", "老师 (lǎoshī)", "邻居 (línjū)"], ans: "同学 (tóngxué)", t: "คนที่เรียนด้วยกันคือ '同学' (เพื่อนร่วมชั้น)" },
+
+    { q: "他住在我的旁边，我们是______。", p: "Tā zhù zài wǒ de pángbiān, wǒmen shì ______.", type: 1,
+      opts: ["邻居 (línjū)", "经理 (jīnglǐ)", "司机 (sījī)", "校长 (xiàozhǎng)"], ans: "邻居 (línjū)", t: "คนที่อยู่ข้างบ้านคือ '邻居' (เพื่อนบ้าน)" },
+
+    { q: "今天家里来了很多______，我要招待他们。", p: "Jīntiān jiālǐ lái le hěn duō ______, wǒ yào zhāodài tāmen.", type: 1,
+      opts: ["客人 (kèrén)", "自己 (zìjǐ)", "邻居 (línjū)", "路人 (lùrén)"], ans: "客人 (kèrén)", t: "คนที่มาเยี่ยมบ้านคือ '客人' (แขก)" },
+
+    { q: "我和他关系很好，我们是好______。", p: "Wǒ hé tā guānxi hěn hǎo, wǒmen shì hǎo ______.", type: 1,
+      opts: ["朋友 (péngyou)", "敌人 (dírén)", "路人 (lùrén)", "经理 (jīnglǐ)"], ans: "朋友 (péngyou)", t: "ความสัมพันธ์ที่ดีเรียกว่า '朋友' (เพื่อน)" },
+
+    { q: "别总是靠别人，这件事你要______做。", p: "Bié zǒngshì kào biérén, zhè jiàn shì nǐ yào ______ zuò.", type: 1,
+      opts: ["自己 (zìjǐ)", "大家 (dàjiā)", "朋友 (péngyou)", "邻居 (línjū)"], ans: "自己 (zìjǐ)", t: "ต้องทำด้วย '自己' (ตนเอง)" },
+
+    { q: "______都到了吗？我们开始开会吧。", p: "______ dōu dào le ma? Wǒmen kāishǐ kāihuì ba.", type: 1,
+      opts: ["大家 (dàjiā)", "别人 (biérén)", "自己 (zìjǐ)", "个人 (gèrén)"], ans: "大家 (dàjiā)", t: "ถามถึงคนทั้งหมดใช้ '大家' (ทุกคน)" },
+
+    { q: "这是我的小狗，______很可爱。", p: "Zhè shì wǒ de xiǎogǒu, ______ hěn kě'ài.", type: 1,
+      opts: ["它 (tā)", "他 (tā)", "她 (tā)", "大家 (dàjiā)"], ans: "它 (tā)", t: "สัตว์ใช้สรรพนาม '它' (มัน)" }
+];
+
+// 游戏状态
+let questions = [];
+let currentIdx = 0;
+let score = 0;
+let userAnswers = new Array(rawQuestions.length).fill(null);
+
+// 随机打乱数组
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+// 初始化题目
+function initQuestions() {
+    questions = rawQuestions.map((item, index) => {
+        let options = item.opts.map(opt => ({
+            text: opt,
+            isCorrect: opt === item.ans
+        }));
+        options = shuffleArray(options);
+        return {
+            id: index,
+            q: item.q,
+            p: item.p,
+            type: item.type,
+            options: options,
+            t: item.t,
+            ansText: item.ans 
+        };
+    });
+}
+
+function startQuiz() {
+    initQuestions();
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('quiz-screen').style.display = 'block';
+    document.getElementById('footer-nav').style.display = 'flex';
+    loadQuestion(0);
+}
+
+function loadQuestion(index) {
+    currentIdx = index;
+    const q = questions[index];
+    const savedState = userAnswers[index]; 
+    
+    document.getElementById('q-progress').innerText = (index + 1) + " / " + questions.length;
+    document.getElementById('q-type-label').innerText = q.type === 1 ? "阅读选词 (Meaning)" : "看字选音 (Pinyin)";
+    document.getElementById('q-text').innerText = (index + 1) + ". " + q.q;
+    
+    // Type 2不显示辅助拼音，Type 1显示
+    document.getElementById('q-pinyin').innerText = q.type === 2 ? "" : q.p;
+    
+    const container = document.getElementById('options-container');
+    container.innerHTML = '';
+    
+    q.options.forEach((opt, optIndex) => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt.text;
+        
+        if (savedState) {
+            btn.classList.add('disabled');
+            if (opt.isCorrect) btn.classList.add('correct'); 
+            if (optIndex === savedState.selectedIndex && !opt.isCorrect) {
+                btn.classList.add('wrong'); 
+            }
+        } else {
+            btn.onclick = () => handleAnswer(opt, optIndex, btn);
+        }
+        
+        container.appendChild(btn);
+    });
+    
+    document.getElementById('btn-prev').style.visibility = index === 0 ? 'hidden' : 'visible';
+    
+    if (savedState) {
+        showFeedback(q);
+        document.getElementById('btn-next').style.display = 'block';
+    } else {
+        document.getElementById('feedback-box').style.display = 'none';
+        document.getElementById('btn-next').style.display = 'none';
+    }
+}
+
+function handleAnswer(selectedOpt, selectedIndex, btnElem) {
+    const q = questions[currentIdx];
+    const isCorrect = selectedOpt.isCorrect;
+    if (isCorrect) score++;
+    document.getElementById('current-score').innerText = score;
+    
+    userAnswers[currentIdx] = {
+        selectedIndex: selectedIndex,
+        isCorrect: isCorrect
+    };
+    
+    const allBtns = document.getElementById('options-container').children;
+    for (let i = 0; i < allBtns.length; i++) {
+        allBtns[i].classList.add('disabled'); 
+        if (q.options[i].isCorrect) {
+            allBtns[i].classList.add('correct'); 
+        }
+    }
+    
+    if (!isCorrect) {
+        btnElem.classList.add('wrong'); 
+    }
+    
+    showFeedback(q);
+    document.getElementById('btn-next').style.display = 'block';
+    
+    setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }, 100);
+}
+
+function showFeedback(q) {
+    const box = document.getElementById('feedback-box');
+    const content = document.getElementById('feedback-content');
+    box.style.display = 'block';
+    content.innerHTML = `
+        <strong>正确答案 (Correct): ${q.ansText}</strong>
+        <div class="thai-expl">📝 ${q.t}</div>
+    `;
+}
+
+function nextQuestion() {
+    if (currentIdx < questions.length - 1) {
+        loadQuestion(currentIdx + 1);
+        window.scrollTo(0, 0);
+    } else {
+        showResult();
+    }
+}
+
+function prevQuestion() {
+    if (currentIdx > 0) {
+        loadQuestion(currentIdx - 1);
+        window.scrollTo(0, 0);
+    }
+}
+
+function showResult() {
+    document.getElementById('quiz-screen').style.display = 'none';
+    document.getElementById('footer-nav').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    document.getElementById('final-score-display').innerText = score;
+}
+</script>
+</body>
+</html>
